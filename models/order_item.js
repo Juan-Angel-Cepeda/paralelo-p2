@@ -14,7 +14,15 @@ class Order_Items{
         try{
             conn = await oracledb.connectToDatabase();
             const result = await conn.execute('SELECT * FROM order_items');
-            return result.rows;
+            return result.rows.map(row=>{
+                return{
+                    order_id:row[0],
+                    line_item_id:row[1],
+                    product_id:row[2],
+                    unit_price:row[3],
+                    quantity:row[4]
+                }
+            });
         }catch(err){
             throw err;
         }finally{
@@ -29,7 +37,18 @@ class Order_Items{
         try{
             conn = await oracledb.connectToDatabase();
             const result = await conn.execute(`SELECT * FROM order_items WHERE order_id = ${order_id}`);
-            return result.rows;
+            if(result.rows.length>0){
+                const row = result.rows[0];
+                return{
+                    order_id:row[0],
+                    line_item_id:row[1],
+                    product_id:row[2],
+                    unit_price:row[3],
+                    quantity:row[4]
+                }
+            }else{
+                return null;
+            }
         }catch(err){
             throw err;
         }finally{

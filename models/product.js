@@ -21,7 +21,21 @@ class Product{
         try{
             conn = await oracledb.connectToDatabase();
             const result = await conn.execute('SELECT product_id, product_name, product_description, category_id, weight_class, TO_CHAR(warranty_period), supplier_id, product_status, list_price, min_price, catalog_url FROM products');
-            return result.rows;
+            return result.rows.map(row=>{
+                return{
+                    product_id:row[0],
+                    product_name:row[1],
+                    product_description:row[2],
+                    category_id:row[3],
+                    weight_class:row[4],
+                    warranty_period:row[5],
+                    supplier_id:row[6],
+                    product_status:row[7],
+                    list_price:row[8],
+                    min_price:row[9],
+                    catalog_url:row[10],
+                }
+            })
         }catch(err){
             throw err;
         }finally{
@@ -31,12 +45,27 @@ class Product{
         }
     }
 
-    static async findById(product_id){
+    static async findById(id){
         let conn;
         try{
             conn = await oracledb.connectToDatabase();
-            const result = await conn.execute('SELECT product_id, product_name, product_description, category_id, weight_class, TO_CHAR(warranty_period), supplier_id, product_status, list_price, min_price, catalog_url FROM products WHERE product_id = :id', [product_id]);
-            return result.rows;
+            const result = await conn.execute('SELECT product_id, product_name, product_description, category_id, weight_class, TO_CHAR(warranty_period), supplier_id, product_status, list_price, min_price, catalog_url FROM products WHERE product_id = :id', [id]);
+            if(result.rows.length>0){
+                const row = result.rows[0];
+                return{
+                    product_id:row[0],
+                    product_name:row[1],
+                    product_description:row[2],
+                    category_id:row[3],
+                    weight_class:row[4],
+                    warranty_period:row[5],
+                    supplier_id:row[6],
+                    product_status:row[7],
+                    list_price:row[8],
+                    min_price:row[9],
+                    catalog_url:row[10],
+                }
+            }
         }catch(err){
             throw err;
         }finally{
