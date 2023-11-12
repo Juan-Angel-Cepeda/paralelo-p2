@@ -1,5 +1,5 @@
 const express = require('express');
-const Customer = require('../models/customers');
+const Customer = require('../models/customer');
 const Redis = require('../redisclient')
 
 
@@ -48,7 +48,7 @@ async function get(req,res,next){
             await Redis.close_conection(redis);
         }
     }
-}
+};
 
 
 module.exports = {list,get};
