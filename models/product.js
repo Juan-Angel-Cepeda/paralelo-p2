@@ -65,6 +65,8 @@ class Product{
                     min_price:row[9],
                     catalog_url:row[10],
                 }
+            }else{
+                return 'producto no encontrado';
             }
         }catch(err){
             throw err;

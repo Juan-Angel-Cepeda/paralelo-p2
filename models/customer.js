@@ -53,7 +53,7 @@ class Customer{
                     region:row[6]
                 };
             }else{
-                return null;
+                return 'Customer no encontrado';
             }
         }catch(err){
             throw err;

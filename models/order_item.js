@@ -47,7 +47,7 @@ class Order_Items{
                     quantity:row[4]
                 }
             }else{
-                return null;
+                return 'Order item no encontrado';
             }
         }catch(err){
             throw err;
