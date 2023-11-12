@@ -50,5 +50,30 @@ async function get(req,res,next){
     }
 };
 
+async function create(req,res,next){
+    let redis;
+    const {customer_id,cust_first_name,cust_last_name,credit_limit,cust_email,income_level,region} = req.body;
+    const customer = new Customer(
+        customer_id,
+        cust_first_name,
+        cust_last_name,
+        credit_limit,
+        cust_email,
+        income_level,
+        region        
+    );
+    customer.save().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('customers');
 
-module.exports = {list,get};
+        res.status(200).send('Cliente creado exitosamente');
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al crear el cliente',
+            error:err
+        })
+    });
+}
+
+module.exports = {list,get,create};

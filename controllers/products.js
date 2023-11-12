@@ -50,5 +50,32 @@ async function get(req,res,next){
     }
 }
 
+async function destroy(req,res,next){
+    let redis;
+    let product_id = req.params.id;
+    try{
+        redis = await Redis.create_connection();
+        await redis.del('products');
+        await redis.del(`products/${product_id}`);
 
-module.exports = {list,get};
+        await Product.destroy(product_id);
+        
+        const products = await Product.findAll();
+        await redis.set('products',JSON.stringify(products));
+        res.status(200).send('Prouducto Eliminado');
+    
+    }catch(err){
+        console.log(err);
+        res.status(500).send('Error al eliminar el producto');
+    }finally{
+        if(redis){
+            await Redis.close_conection(redis);
+        }
+    }
+}
+
+async function create(req,res,next){
+
+}
+
+module.exports = {list,get,destroy,create};

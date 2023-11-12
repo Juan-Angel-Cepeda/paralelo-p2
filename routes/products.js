@@ -4,5 +4,7 @@ const controller = require('../controllers/products');
 
 router.get('/',controller.list);
 router.get('/:id',controller.get);
+router.delete('/:id',controller.destroy);
+router.post('/',controller.create);
 
 module.exports = router;
