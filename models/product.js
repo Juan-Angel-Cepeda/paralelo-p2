@@ -93,25 +93,110 @@ class Product{
         }
     }
     
-    static async create(){
+    async save() {
         let conn;
-        try{
+        try {
             conn = await oracledb.connectToDatabase();
-            await conn.execute('INSERT INTO PRODUCTS (PRODUCT_ID,PRODUCT_NAME,PRODUCT_DESCRIPTION,CATEGORY_ID,WEIGHT_CLASS,WARRANTY_PERIOD,SUPPLIER_ID,PRODUCT_STATUS,LIST_PRICE,MIN_PRICE,CATALOG_URL) values (:product_id,:product_name,:product_description,:category_id,:weight_class,:warranty_period,:supplier_id,:product_status,:list_price,:min_price,:catalog_url);',
-            [this.product_id,this.product_name,this.product_description,this.category_id,this.weight_class,
-                this.warranty_period,this.supplier_id,this.product_status,this.list_price,this.min_price,this.catalog_url]);
-                console.log('product created');
-                await conn.execute('COMMIT');
-        }catch(err){
+            await conn.execute(
+                `INSERT INTO PRODUCT_INFORMATION (
+                    PRODUCT_ID, 
+                    PRODUCT_NAME, 
+                    PRODUCT_DESCRIPTION, 
+                    CATEGORY_ID, 
+                    WEIGHT_CLASS, 
+                    WARRANTY_PERIOD, 
+                    SUPPLIER_ID, 
+                    PRODUCT_STATUS, 
+                    LIST_PRICE, 
+                    MIN_PRICE, 
+                    CATALOG_URL
+                ) VALUES (
+                    :product_id, 
+                    :product_name, 
+                    :product_description, 
+                    :category_id, 
+                    :weight_class, 
+                    :warranty_period, 
+                    :supplier_id, 
+                    :product_status, 
+                    :list_price, 
+                    :min_price, 
+                    :catalog_url
+                )`, 
+                [
+                    this.product_id, 
+                    this.product_name, 
+                    this.product_description, 
+                    this.category_id, 
+                    this.weight_class, 
+                    this.warranty_period, // Asegúrate de que esté en el formato correcto para Oracle
+                    this.supplier_id, 
+                    this.product_status, 
+                    this.list_price, 
+                    this.min_price, 
+                    this.catalog_url
+                ]
+            );
+            console.log('product created');
+            await conn.execute('COMMIT');
+        } catch(err) {
+            console.error(err);
+            await conn.execute('ROLLBACK');
             throw err;
-        }finally{
-            if(conn){
+        } finally {
+            if (conn) {
                 await oracledb.closeConnection();
             }
         }   
     }
+   
 
-    //update
+    async update() {
+        let conn;
+        try {
+            conn = await oracledb.connectToDatabase();
+            await conn.execute(
+                `BEGIN 
+                    update_product_information(
+                        :product_id, 
+                        :product_name, 
+                        :product_description, 
+                        :category_id, 
+                        :weight_class, 
+                        :warranty_period, 
+                        :supplier_id, 
+                        :product_status, 
+                        :list_price, 
+                        :min_price, 
+                        :catalog_url
+                    ); 
+                 END;`,
+                {
+                    product_id: this.product_id,
+                    product_name: this.product_name,
+                    product_description: this.product_description,
+                    category_id: this.category_id,
+                    weight_class: this.weight_class,
+                    warranty_period: this.warranty_period, // Corregido aquí
+                    supplier_id: this.supplier_id,
+                    product_status: this.product_status,
+                    list_price: this.list_price,
+                    min_price: this.min_price,
+                    catalog_url: this.catalog_url
+                }
+            );
+            console.log('product updated');
+            await conn.execute('COMMIT');
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            if (conn) {
+                await oracledb.closeConnection(conn);
+            }
+        }
+    }
+
 }
 
 module.exports = Product;

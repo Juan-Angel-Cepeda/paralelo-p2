@@ -56,7 +56,7 @@ class Order{
                     promotion_id:row[7]
                 };
             }else{
-                return null;
+                return 'Orden no encontrada';
             }
         }catch(err){
             throw err;

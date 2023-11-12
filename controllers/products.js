@@ -75,7 +75,55 @@ async function destroy(req,res,next){
 }
 
 async function create(req,res,next){
+    let redis;
+    const {product_id,product_name,product_description,category_id,weight_class,
+        warranty_period,supplier_id,product_status,list_price,min_price,catalog_url} = req.body;
+    
 
+        
+        product = new Product(
+        product_id,product_name,product_description,category_id,weight_class,
+        warranty_period,supplier_id,product_status,list_price,min_price,catalog_url);
+    
+        product.save().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('products');
+        await redis.del(`products/${product_id}`);
+        const products = await Product.findAll();
+        await redis.set('products',JSON.stringify(products));
+        res.status(200).send('Producto creado exitosamente');
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al crear el cliente',
+            error:err
+        });
+    });
 }
 
-module.exports = {list,get,destroy,create};
+async function update(req,res,next){
+    let redis;
+    let product_id = req.params.id;
+    
+    const {product_name,product_description,category_id,weight_class,
+    warranty_period,supplier_id,product_status,list_price,min_price,catalog_url} = req.body;
+    const product = new Product(product_id,product_name,product_description,category_id,weight_class,
+    warranty_period,supplier_id,product_status,list_price,min_price,catalog_url);
+
+    product.update().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('products');
+        await redis.del(`products/${product_id}`);
+        const products = await Product.findAll();
+        await redis.set('products',JSON.stringify(products));
+        res.status(200).send('Producto actualizado exitosamente')
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al actualizar el producto',
+            error:err
+        });
+    });
+}
+
+module.exports = {list,get,destroy,create,update};

@@ -65,7 +65,8 @@ async function create(req,res,next){
     customer.save().then( async ()=>{
         redis = await Redis.create_connection();
         await redis.del('customers');
-
+        customers = await Customer.findAll();
+        await redis.set('customers',JSON.stringify(customers));
         res.status(200).send('Cliente creado exitosamente');
     }).catch((err)=>{
         console.log(err);
