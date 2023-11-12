@@ -1,4 +1,5 @@
 const oracledb = require('oracledb');
+
 async function connectToDatabase(){
     try{
         let connection = await oracledb.getConnection({
