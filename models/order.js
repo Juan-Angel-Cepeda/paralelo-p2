@@ -139,7 +139,7 @@ class Order{
             conn = await oracledb.connectToDatabase();
             await conn.execute(
                 `BEGIN 
-                    delete_customer(
+                    delete_order(
                         :order_id
                     ); 
                  END;`,
