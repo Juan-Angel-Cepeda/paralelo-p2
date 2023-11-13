@@ -76,14 +76,14 @@ async function destroy(req,res,next){
 
 async function create(req,res,next){
     let redis;
-    const {order_id, order_date, order_mode, customer_id, 
+    const {order_id, order_mode, customer_id, 
            order_status, order_total, sales_rep_id, promotion_id} = req.body;
 
-        order = new Order(
-            order_id, order_date, order_mode, customer_id, 
-            order_status, order_total, sales_rep_id, promotion_id);
+    const current_date = new Date();
+    const order_date = current_date.toISOString(); // Esto genera una fecha en formato ISO 8601
+    order = new Order(order_id, order_date, order_mode, customer_id,order_status, order_total, sales_rep_id, promotion_id);
     
-        order.save().then( async ()=>{
+    order.save().then( async ()=>{
         redis = await Redis.create_connection();
         await redis.del('orders');
         await redis.del(`orders/${order_id}`);

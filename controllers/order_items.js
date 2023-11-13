@@ -57,6 +57,7 @@ async function destroy(req,res,next){
         redis = await Redis.create_connection();
         await redis.del('order_items');
         await redis.del(`order_items/${order_id}/${line_item_id}`);
+        await redis.del(`order_items/${order_id}`);
 
         await Order_items.destroy(order_id,line_item_id);
         

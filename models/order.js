@@ -72,7 +72,7 @@ class Order{
         try{
             conn = await oracledb.connectToDatabase();
             const result = await conn.execute(
-                'BEGIN create_order(:order_id,TO_DATE(:order_date,`${DD-MON-YYYY}`),:order_mode,:customer_id,:order_status,:order_total,:sales_rep_id,:promotion_id);END;',
+                'BEGIN create_order(:order_id,:order_date,:order_mode,:customer_id,:order_status,:order_total,:sales_rep_id,:promotion_id);END;',
                 [this.order_id,
                     this.order_date,
                     this.order_mode,
