@@ -50,5 +50,80 @@ async function get(req,res,next){
     }
 }
 
+async function destroy(req,res,next){
+    let redis;
+    let order_id = req.params.id;
+    try{
+        redis = await Redis.create_connection();
+        await redis.del('orders');
+        await redis.del(`orders/${order_id}`);
 
-module.exports = {list,get};
+        await Order.destroy(order_id);
+        
+        const orders = await Order.findAll();
+        await redis.set('orders',JSON.stringify(orders));
+        res.status(200).send('Orden Eliminada');
+    
+    }catch(err){
+        console.log(err);
+        res.status(500).send('Error al eliminar la orden');
+    }finally{
+        if(redis){
+            await Redis.close_conection(redis);
+        }
+    }
+}
+
+async function create(req,res,next){
+    let redis;
+    const {order_id, order_date, order_mode, customer_id, 
+           order_status, order_total, sales_rep_id, promotion_id} = req.body;
+               
+        order = new Order(
+            order_id, order_date, order_mode, customer_id, 
+            order_status, order_total, sales_rep_id, promotion_id);
+    
+        order.save().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('orders');
+        await redis.del(`orders/${order_id}`);
+        const orders = await Order.findAll();
+        await redis.set('orders',JSON.stringify(orders));
+        res.status(200).send('Orden creada exitosamente');
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al crear la orden',
+            error:err
+        });
+    });
+}
+
+async function update(req,res,next){
+    let redis;
+    let order_id = req.params.id;
+    
+    const {order_date, order_mode, customer_id, 
+          order_status, order_total, sales_rep_id, promotion_id} = req.body;
+
+    const order = new Order(order_id, order_date, order_mode, customer_id, 
+        order_status, order_total, sales_rep_id, promotion_id);
+
+    order.update().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('orders');
+        await redis.del(`orders/${order_id}`);
+        const orders = await Order.findAll();
+        await redis.set('orders',JSON.stringify(orders));
+        res.status(200).send('Orden actualizada exitosamente')
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al actualizar la orden',
+            error:err
+        });
+    });
+}
+
+
+module.exports = { list, get, create, update, destroy };

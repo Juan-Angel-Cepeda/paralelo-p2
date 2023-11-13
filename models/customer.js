@@ -83,9 +83,73 @@ class Customer{
         }
     }
 
-    //update
+    async update() {
+        let conn;
+        try {
+            conn = await oracledb.connectToDatabase();
+            await conn.execute(
+                `BEGIN 
+                    update_customer(
+                        :customer_id;
+                        :cust_first_name;
+                        :cust_last_name;
+                        :credit_limit;
+                        :cust_email;
+                        :income_level;
+                        :region;
+                    ); 
+                 END;`,
+                {
+                    customer_id:this.customer_id,
+                    cust_first_name:this.cust_fisrt_name,
+                    cust_last_name:this.cust_last_name,
+                    credit_limit:this.credit_limit,
+                    cust_email:this.cust_email,
+                    income_level:this.income_level,
+                    region:this.region
+                }
+            );
+            console.log('customer updated');
+            await conn.execute('COMMIT');
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            if (conn) {
+                await oracledb.closeConnection(conn);
+            }
+        }
+    }
 
-    //delete
+    async destroy(customer_id,region){
+        let conn;
+        try {
+            conn = await oracledb.connectToDatabase();
+            await conn.execute(
+                `BEGIN 
+                    delete_customer(
+                        :customer_id;
+                        :region;
+                    ); 
+                 END;`,
+                {
+                    customer_id:customer_id,
+                    region:region
+                }
+            );
+            console.log('customer delted');
+            await conn.execute('COMMIT');
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            if (conn) {
+                await oracledb.closeConnection(conn);
+            }
+        }
+
+    }
+    
 
 }
 

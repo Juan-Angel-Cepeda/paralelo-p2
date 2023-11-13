@@ -77,4 +77,59 @@ async function create(req,res,next){
     });
 }
 
-module.exports = {list,get,create};
+async function update(req,res,next){
+    let redis;
+    const customer_id = req.params.id;
+    const {cust_first_name,cust_last_name,credit_limit,cust_email,income_level,region} = req.body;
+    const customer = new Customer(
+        customer_id,
+        cust_first_name,
+        cust_last_name,
+        credit_limit,
+        cust_email,
+        income_level,
+        region        
+    );
+
+    customer.update().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('customers');
+        await redis.del(`customers/${customer_id}`);
+        const customers = await Customer.findAll();
+        await redis.set('customers',JSON.stringify(customer));
+        res.status(200).send('Cliente actualizado exitosamente')
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al actualizar el cliente',
+            error:err
+        });
+    });
+}
+
+async function destroy(req,res,next){
+    let redis;
+    let product_id = req.params.id;
+    let region = req.params.region;
+    try{
+        redis = await Redis.create_connection();
+        await redis.del('customers');
+        await redis.del(`customers/${customer_id}`);
+
+        await Customer.destroy(product_id,region);
+        
+        const customers = await Customer.findAll();
+        await redis.set('customers',JSON.stringify(customers));
+        res.status(200).send('Cliente Eliminado');
+    
+    }catch(err){
+        console.log(err);
+        res.status(500).send('Error al eliminar el cliente');
+    }finally{
+        if(redis){
+            await Redis.close_conection(redis);
+        }
+    }
+}
+
+module.exports = {list,get,create,update,destroy};

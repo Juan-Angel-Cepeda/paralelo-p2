@@ -67,13 +67,97 @@ class Order{
         }
     }
 
+    async save(){
+        let conn;
+        try{
+            conn = await oracledb.connectToDatabase();
+            const result = await conn.execute(
+                'BEGIN create_order(:order_id,TO_DATE(:order_date,`${DD-MON-YYYY}`),:order_mode,:customer_id,:order_status,:order_total,:sales_rep_id,:promotion_id);END;',
+                [this.order_id,
+                    this.order_date,
+                    this.order_mode,
+                    this.customer_id,
+                    this.order_status,
+                    this.order_total,
+                    this.sales_rep_id,
+                    this.promotion_id]
+            );
+            console.log('order created');
+            await conn.execute('COMMIT');
+        }catch(err){
+            throw err;
+        }finally{
+            if(conn){
+                await oracledb.closeConnection();
+            }
+        }
+    }
 
-    //crete
+    async update() {
+        let conn;
+        try {
+            conn = await oracledb.connectToDatabase();
+            await conn.execute(
+                `BEGIN 
+                    update_order(
+                        :order_id;
+                        :order_date;
+                        :order_mode;
+                        :customer_id;
+                        :order_status;
+                        :order_total;
+                        :sales_rep_id;
+                        :promotion_id;
+                    ); 
+                 END;`,
+                {
+                    order_id:this.order_id,
+                    order_date:this.order_date,
+                    order_mode:this.order_mode,
+                    customer_id:this.customer_id,
+                    order_status:this.order_status,
+                    order_total:this.order_total,
+                    sales_rep_id:this.sales_rep_id,
+                    promotion_id:this.promotion_id
+                }
+            );
+            console.log('order updated');
+            await conn.execute('COMMIT');
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            if (conn) {
+                await oracledb.closeConnection(conn);
+            }
+        }
+    }
 
-    //update
-
-    //delete
-
+    async destroy(order_id){
+        let conn;
+        try {
+            conn = await oracledb.connectToDatabase();
+            await conn.execute(
+                `BEGIN 
+                    delete_customer(
+                        :order_id;
+                    ); 
+                 END;`,
+                {
+                    order_id:order_id,
+                }
+            );
+            console.log('order delted');
+            await conn.execute('COMMIT');
+        } catch (err) {
+            console.error(err);
+            throw err;
+        } finally {
+            if (conn) {
+                await oracledb.closeConnection(conn);
+            }
+        }
+    }
 }
 
 module.exports = Order;

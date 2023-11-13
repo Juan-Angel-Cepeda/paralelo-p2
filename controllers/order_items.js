@@ -2,7 +2,6 @@ const express = require('express');
 const Order_items = require('../models/order_item');
 const Redis = require('../redisclient');
 
-
 async function list(req,res,next){ 
     let redis;
     try{
@@ -50,5 +49,77 @@ async function get(req,res,next){
     }
 }
 
+async function destroy(req,res,next){
+    let redis;
+    let order_id = req.params.id;
+    let line_item_id = req.params.item_id;
+    try{
+        redis = await Redis.create_connection();
+        await redis.del('order_items');
+        await redis.del(`order_items/${order_id}/${line_item_id}`);
 
-module.exports = {list,get};
+        await Order_items.destroy(order_id,line_item_id);
+        
+        const order_items = await Order_items.findAll();
+        await redis.set('order_items',JSON.stringify(order_items));
+        res.status(200).send('Order Items Eliminado');
+    
+    }catch(err){
+        console.log(err);
+        res.status(500).send('Error al eliminar el OI');
+    }finally{
+        if(redis){
+            await Redis.close_conection(redis);
+        }
+    }
+}
+
+async function create(req,res,next){
+    let redis;
+    const {order_id, line_item_id, product_id, unit_price, quantity} = req.body;
+
+    
+        order_item = new Order_items(order_id, line_item_id, product_id, unit_price, quantity);
+    
+        order_item.save().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('order_items');
+        await redis.del(`order_items/${order_id}`);
+        const order_items = await Order_items.findAll();
+        await redis.set('order_items',JSON.stringify(order_items));
+        res.status(200).send('Order Item creado exitosamente');
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al crear el OI',
+            error:err
+        });
+    });
+}
+
+async function update(req,res,next){
+    let redis;
+    let order_id = req.params.id;
+    let line_item_id = req.params.item_id
+    
+    const { product_id, unit_price, quantity } = req.body;
+    const order_item = new Order_items(order_id, line_item_id, product_id, unit_price, quantity);
+
+    order_item.update().then( async ()=>{
+        redis = await Redis.create_connection();
+        await redis.del('order_items');
+        await redis.del(`order_items/${order_id}`);
+        const order_items = await Order_items.findAll();
+        await redis.set('order_items',JSON.stringify(order_items));
+        res.status(200).send('Order items actualizado exitosamente')
+    }).catch((err)=>{
+        console.log(err);
+        res.status(406).json({
+            message:'Error al actualizar el OI',
+            error:err
+        });
+    });
+}
+
+
+module.exports = {list, get, create, update, destroy};

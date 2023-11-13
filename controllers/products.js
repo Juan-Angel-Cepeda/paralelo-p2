@@ -78,9 +78,8 @@ async function create(req,res,next){
     let redis;
     const {product_id,product_name,product_description,category_id,weight_class,
         warranty_period,supplier_id,product_status,list_price,min_price,catalog_url} = req.body;
-    
 
-        
+    
         product = new Product(
         product_id,product_name,product_description,category_id,weight_class,
         warranty_period,supplier_id,product_status,list_price,min_price,catalog_url);
