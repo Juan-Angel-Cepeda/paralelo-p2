@@ -3,7 +3,7 @@ const oracledb = require('../db');
 class Customer{
     constructor(customer_id,cust_first_name,cust_last_name,credit_limit,cust_email,income_level,region){
         this.customer_id = customer_id;
-        this.cust_fisrt_name = cust_first_name;
+        this.cust_first_name = cust_first_name;
         this.cust_last_name = cust_last_name;
         this.credit_limit = credit_limit;
         this.cust_email = cust_email;
@@ -90,18 +90,18 @@ class Customer{
             await conn.execute(
                 `BEGIN 
                     update_customer(
-                        :customer_id;
-                        :cust_first_name;
-                        :cust_last_name;
-                        :credit_limit;
-                        :cust_email;
-                        :income_level;
-                        :region;
+                        :customer_id,
+                        :cust_first_name,
+                        :cust_last_name,
+                        :credit_limit,
+                        :cust_email,
+                        :income_level,
+                        :region
                     ); 
                  END;`,
                 {
                     customer_id:this.customer_id,
-                    cust_first_name:this.cust_fisrt_name,
+                    cust_first_name:this.cust_first_name,
                     cust_last_name:this.cust_last_name,
                     credit_limit:this.credit_limit,
                     cust_email:this.cust_email,
@@ -121,15 +121,15 @@ class Customer{
         }
     }
 
-    async destroy(customer_id,region){
+    static async destroy(customer_id,region){
         let conn;
         try {
             conn = await oracledb.connectToDatabase();
             await conn.execute(
                 `BEGIN 
                     delete_customer(
-                        :customer_id;
-                        :region;
+                        :customer_id,
+                        :region
                     ); 
                  END;`,
                 {

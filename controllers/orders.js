@@ -78,7 +78,7 @@ async function create(req,res,next){
     let redis;
     const {order_id, order_date, order_mode, customer_id, 
            order_status, order_total, sales_rep_id, promotion_id} = req.body;
-               
+
         order = new Order(
             order_id, order_date, order_mode, customer_id, 
             order_status, order_total, sales_rep_id, promotion_id);
@@ -90,8 +90,11 @@ async function create(req,res,next){
         const orders = await Order.findAll();
         await redis.set('orders',JSON.stringify(orders));
         res.status(200).send('Orden creada exitosamente');
-    }).catch((err)=>{
+    }).catch(async (err)=>{
         console.log(err);
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         res.status(406).json({
             message:'Error al crear la orden',
             error:err
@@ -116,8 +119,11 @@ async function update(req,res,next){
         const orders = await Order.findAll();
         await redis.set('orders',JSON.stringify(orders));
         res.status(200).send('Orden actualizada exitosamente')
-    }).catch((err)=>{
+    }).catch(async (err)=>{
         console.log(err);
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         res.status(406).json({
             message:'Error al actualizar la orden',
             error:err

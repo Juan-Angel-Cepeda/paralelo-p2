@@ -91,8 +91,11 @@ async function create(req,res,next){
         const products = await Product.findAll();
         await redis.set('products',JSON.stringify(products));
         res.status(200).send('Producto creado exitosamente');
-    }).catch((err)=>{
+    }).catch(async (err)=>{
         console.log(err);
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         res.status(406).json({
             message:'Error al crear el cliente',
             error:err
@@ -116,7 +119,10 @@ async function update(req,res,next){
         const products = await Product.findAll();
         await redis.set('products',JSON.stringify(products));
         res.status(200).send('Producto actualizado exitosamente')
-    }).catch((err)=>{
+    }).catch(async (err)=>{
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         console.log(err);
         res.status(406).json({
             message:'Error al actualizar el producto',

@@ -133,7 +133,7 @@ class Order{
         }
     }
 
-    async destroy(order_id){
+    static async destroy(order_id){
         let conn;
         try {
             conn = await oracledb.connectToDatabase();

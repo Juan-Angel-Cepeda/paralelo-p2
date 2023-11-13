@@ -65,11 +65,15 @@ async function create(req,res,next){
     customer.save().then( async ()=>{
         redis = await Redis.create_connection();
         await redis.del('customers');
+        await redis.del(`customers/${customer_id}`);
         customers = await Customer.findAll();
         await redis.set('customers',JSON.stringify(customers));
         res.status(200).send('Cliente creado exitosamente');
-    }).catch((err)=>{
+    }).catch(async (err)=>{
         console.log(err);
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         res.status(406).json({
             message:'Error al crear el cliente',
             error:err
@@ -81,6 +85,7 @@ async function update(req,res,next){
     let redis;
     const customer_id = req.params.id;
     const {cust_first_name,cust_last_name,credit_limit,cust_email,income_level,region} = req.body;
+    
     const customer = new Customer(
         customer_id,
         cust_first_name,
@@ -96,27 +101,31 @@ async function update(req,res,next){
         await redis.del('customers');
         await redis.del(`customers/${customer_id}`);
         const customers = await Customer.findAll();
-        await redis.set('customers',JSON.stringify(customer));
+        await redis.set('customers',JSON.stringify(customers));
         res.status(200).send('Cliente actualizado exitosamente')
-    }).catch((err)=>{
+    }).catch(async (err)=>{
         console.log(err);
         res.status(406).json({
             message:'Error al actualizar el cliente',
             error:err
         });
+    }).finally(async()=>{
+        if(redis){
+            await Redis.close_conection(redis);
+        }
     });
 }
 
 async function destroy(req,res,next){
     let redis;
-    let product_id = req.params.id;
+    let customer_id = req.params.id;
     let region = req.params.region;
     try{
         redis = await Redis.create_connection();
         await redis.del('customers');
         await redis.del(`customers/${customer_id}`);
 
-        await Customer.destroy(product_id,region);
+        await Customer.destroy(customer_id,region);
         
         const customers = await Customer.findAll();
         await redis.set('customers',JSON.stringify(customers));

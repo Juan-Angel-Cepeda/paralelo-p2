@@ -88,8 +88,11 @@ async function create(req,res,next){
         const order_items = await Order_items.findAll();
         await redis.set('order_items',JSON.stringify(order_items));
         res.status(200).send('Order Item creado exitosamente');
-    }).catch((err)=>{
+    }).catch(async(err)=>{
         console.log(err);
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         res.status(406).json({
             message:'Error al crear el OI',
             error:err
@@ -112,8 +115,11 @@ async function update(req,res,next){
         const order_items = await Order_items.findAll();
         await redis.set('order_items',JSON.stringify(order_items));
         res.status(200).send('Order items actualizado exitosamente')
-    }).catch((err)=>{
+    }).catch(async (err)=>{
         console.log(err);
+        if(redis){
+            await Redis.close_conection(redis);
+        }
         res.status(406).json({
             message:'Error al actualizar el OI',
             error:err
