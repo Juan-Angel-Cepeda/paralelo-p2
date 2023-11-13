@@ -140,7 +140,7 @@ class Order{
             await conn.execute(
                 `BEGIN 
                     delete_customer(
-                        :order_id;
+                        :order_id
                     ); 
                  END;`,
                 {
