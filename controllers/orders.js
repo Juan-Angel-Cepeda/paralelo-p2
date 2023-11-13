@@ -78,9 +78,9 @@ async function create(req,res,next){
     let redis;
     const {order_id, order_mode, customer_id, 
            order_status, order_total, sales_rep_id, promotion_id} = req.body;
-
-    const current_date = new Date();
-    const order_date = current_date.toISOString(); // Esto genera una fecha en formato ISO 8601
+           
+    
+    const order_date = new Date(Date.now());
     order = new Order(order_id, order_date, order_mode, customer_id,order_status, order_total, sales_rep_id, promotion_id);
     
     order.save().then( async ()=>{
@@ -105,9 +105,8 @@ async function create(req,res,next){
 async function update(req,res,next){
     let redis;
     let order_id = req.params.id;
-    
-    const {order_date, order_mode, customer_id, 
-          order_status, order_total, sales_rep_id, promotion_id} = req.body;
+    const order_date = new Date(Date.now());
+    const {order_mode, customer_id, order_status, order_total, sales_rep_id, promotion_id} = req.body;
 
     const order = new Order(order_id, order_date, order_mode, customer_id, 
         order_status, order_total, sales_rep_id, promotion_id);
@@ -118,7 +117,7 @@ async function update(req,res,next){
         await redis.del(`orders/${order_id}`);
         const orders = await Order.findAll();
         await redis.set('orders',JSON.stringify(orders));
-        res.status(200).send('Orden actualizada exitosamente')
+        res.status(200).send('Orden actualizada exitosamente');
     }).catch(async (err)=>{
         console.log(err);
         if(redis){

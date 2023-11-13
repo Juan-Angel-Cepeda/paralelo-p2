@@ -71,9 +71,9 @@ class Order{
         let conn;
         try{
             conn = await oracledb.connectToDatabase();
-            const result = await conn.execute(
+            await conn.execute(
                 'BEGIN create_order(:order_id,:order_date,:order_mode,:customer_id,:order_status,:order_total,:sales_rep_id,:promotion_id);END;',
-                [this.order_id,
+                [   this.order_id,
                     this.order_date,
                     this.order_mode,
                     this.customer_id,
@@ -100,14 +100,14 @@ class Order{
             await conn.execute(
                 `BEGIN 
                     update_order(
-                        :order_id;
-                        :order_date;
-                        :order_mode;
-                        :customer_id;
-                        :order_status;
-                        :order_total;
-                        :sales_rep_id;
-                        :promotion_id;
+                        :order_id,
+                        :order_date,
+                        :order_mode,
+                        :customer_id,
+                        :order_status,
+                        :order_total,
+                        :sales_rep_id,
+                        :promotion_id
                     ); 
                  END;`,
                 {
